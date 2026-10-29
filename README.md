@@ -74,7 +74,8 @@ flowchart LR
   forgotten grant fails closed. A pgTAP test caught exactly this for the payment function during development.
 - Security headers (CSP, HSTS, `frame-ancestors 'none'`, Permissions-Policy) in [`next.config.ts`](next.config.ts);
   the build refuses a secret key in a `NEXT_PUBLIC_` variable ([`lib/env.ts`](lib/env.ts)).
-- Midtrans notifications are verified with the SHA-512 signature (constant-time compare), and the paid amount must
+- Midtrans notifications are verified with the SHA-512 signature (constant-time compare); because that signature does not cover the
+  transaction status, the webhook then reads the status from the Midtrans API, and the paid amount must
   match the order the database priced.
 
 ### AI design
@@ -96,7 +97,7 @@ flowchart LR
 
 | Layer | Tool | What it covers |
 | --- | --- | --- |
-| Unit | Vitest (52 tests) | CSV parsing and mapping, rupiah parsing, form schemas, prompts, heuristics, Midtrans signatures, the Claude client against a stub API |
+| Unit | Vitest (55 tests) | CSV parsing and mapping, rupiah parsing, redirect targets, form schemas, prompts, heuristics, Midtrans signatures, the Claude client against a stub API |
 | Database | pgTAP (46 tests) | RLS on every table, tenant isolation, each role's permissions, grants, invitations, seat limits, AI quota, billing guards, demo guards |
 | End to end | Playwright (9 tests) | demo as owner and as sales, drag and drop, AI features, sign-up → workspace → contact → CSV import → invitation → teammate joins, 404 across tenants |
 

@@ -3,15 +3,10 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import type { FormState } from '@/components/forms';
+import { safeRedirectPath as safeNext } from '@/lib/redirect';
 import { siteOrigin } from '@/lib/site';
 import { createClient } from '@/lib/supabase/server';
 import { fieldErrors } from '@/lib/validation';
-
-/** Only same-site paths: "/o/…", never "//evil.example" or "https://…". */
-function safeNext(value: FormDataEntryValue | null, fallback: string): string {
-  const next = typeof value === 'string' ? value : '';
-  return next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : fallback;
-}
 
 const signInSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email('Enter a valid email.')),

@@ -1,11 +1,21 @@
 import { NextResponse } from 'next/server';
-import { midtransConfig, orderStatus, parseGrossAmount, verifySignature, type MidtransNotification } from '@/lib/midtrans';
+import {
+  fetchTransactionStatus,
+  midtransConfig,
+  orderStatus,
+  parseGrossAmount,
+  verifySignature,
+  type MidtransNotification,
+  type TransactionStatus,
+} from '@/lib/midtrans';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Midtrans payment notifications (Settings → Configuration → Payment Notification URL).
- * Unsigned or mis-signed requests are rejected; the amount is checked against the order in the
- * database; repeats are harmless (apply_billing_notification is idempotent).
+ *
+ * The signature proves the request came from Midtrans, but it does not cover transaction_status,
+ * so the status and amount applied come from Midtrans' status API, never from the body. The
+ * database then checks the amount against the order; repeats are harmless (idempotent).
  */
 export async function POST(request: Request) {
   const config = midtransConfig();
@@ -23,19 +33,29 @@ export async function POST(request: Request) {
   // Midtrans' own test notifications and other apps' orders on the same account.
   if (!notification.order_id.startsWith('relasi-')) return NextResponse.json({ ok: true, ignored: true });
 
-  const status = orderStatus(notification);
-  const amount = parseGrossAmount(notification.gross_amount);
+  let transaction: TransactionStatus;
+  try {
+    transaction = await fetchTransactionStatus(config, notification.order_id);
+  } catch (error) {
+    console.error('[midtrans] status', notification.order_id, error);
+    // 5xx: Midtrans retries the notification later.
+    return NextResponse.json({ error: 'status unavailable' }, { status: 502 });
+  }
+  if (transaction.order_id !== notification.order_id) return NextResponse.json({ error: 'order mismatch' }, { status: 422 });
+
+  const status = orderStatus(transaction);
   if (!status) return NextResponse.json({ ok: true, status: 'pending' });
-  if (amount === null) return NextResponse.json({ error: 'invalid amount' }, { status: 400 });
+  const amount = parseGrossAmount(transaction.gross_amount);
+  if (amount === null) return NextResponse.json({ error: 'invalid amount' }, { status: 422 });
 
   const { error } = await createAdminClient().rpc('apply_billing_notification', {
-    p_order: notification.order_id,
+    p_order: transaction.order_id,
     p_status: status,
     p_amount: amount,
-    p_payload: notification as never,
+    p_payload: transaction as never,
   });
   if (error) {
-    console.error('[midtrans] apply', notification.order_id, error.message);
+    console.error('[midtrans] apply', transaction.order_id, error.message);
     // 4xx for a mismatch Midtrans should not retry; 5xx so it retries anything else.
     const permanent = error.code === 'P0002' || error.code === '22023';
     return NextResponse.json({ error: 'not applied' }, { status: permanent ? 422 : 500 });

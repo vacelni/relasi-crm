@@ -71,14 +71,34 @@ export function verifySignature(notification: MidtransNotification, serverKey: s
   return timingSafeEqual(Buffer.from(given), Buffer.from(expected));
 }
 
+export type TransactionStatus = Pick<MidtransNotification, 'order_id' | 'status_code' | 'gross_amount' | 'transaction_status' | 'fraud_status'>;
+
+/**
+ * The transaction as Midtrans records it. The notification's signature does not cover
+ * transaction_status, so the webhook asks Midtrans directly instead of trusting the body.
+ */
+export async function fetchTransactionStatus(config: MidtransConfig, orderId: string): Promise<TransactionStatus> {
+  const host = config.isProduction ? 'https://api.midtrans.com' : 'https://api.sandbox.midtrans.com';
+  const response = await fetch(`${host}/v2/${encodeURIComponent(orderId)}/status`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Basic ${Buffer.from(`${config.serverKey}:`).toString('base64')}`,
+    },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error(`Midtrans status request failed (${response.status}).`);
+  return (await response.json()) as TransactionStatus;
+}
+
 /** Midtrans transaction status → billing_orders.status (null: nothing to record yet). */
-export function orderStatus(notification: Pick<MidtransNotification, 'transaction_status' | 'fraud_status'>) {
-  switch (notification.transaction_status) {
+export function orderStatus(transaction: Pick<TransactionStatus, 'status_code' | 'transaction_status' | 'fraud_status'>) {
+  switch (transaction.transaction_status) {
     case 'capture':
       // Card payments: "challenge" waits for a manual review in the Midtrans dashboard.
-      return notification.fraud_status === 'accept' ? 'paid' : null;
+      return transaction.status_code === '200' && transaction.fraud_status === 'accept' ? 'paid' : null;
     case 'settlement':
-      return 'paid';
+      // 200 is Midtrans' success code; anything else is not a completed payment.
+      return transaction.status_code === '200' ? 'paid' : null;
     case 'deny':
     case 'cancel':
     case 'failure':

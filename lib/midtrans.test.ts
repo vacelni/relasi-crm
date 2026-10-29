@@ -30,12 +30,17 @@ describe('verifySignature', () => {
 
 describe('orderStatus', () => {
   it('maps Midtrans statuses', () => {
-    expect(orderStatus({ transaction_status: 'settlement' })).toBe('paid');
-    expect(orderStatus({ transaction_status: 'capture', fraud_status: 'accept' })).toBe('paid');
-    expect(orderStatus({ transaction_status: 'capture', fraud_status: 'challenge' })).toBeNull();
-    expect(orderStatus({ transaction_status: 'pending' })).toBeNull();
-    expect(orderStatus({ transaction_status: 'expire' })).toBe('expired');
-    expect(orderStatus({ transaction_status: 'deny' })).toBe('failed');
+    expect(orderStatus({ status_code: '200', transaction_status: 'settlement' })).toBe('paid');
+    expect(orderStatus({ status_code: '200', transaction_status: 'capture', fraud_status: 'accept' })).toBe('paid');
+    expect(orderStatus({ status_code: '201', transaction_status: 'capture', fraud_status: 'challenge' })).toBeNull();
+    expect(orderStatus({ status_code: '201', transaction_status: 'pending' })).toBeNull();
+    expect(orderStatus({ status_code: '407', transaction_status: 'expire' })).toBe('expired');
+    expect(orderStatus({ status_code: '202', transaction_status: 'deny' })).toBe('failed');
+  });
+
+  it('never counts a payment as paid without the success code', () => {
+    expect(orderStatus({ status_code: '201', transaction_status: 'settlement' })).toBeNull();
+    expect(orderStatus({ status_code: '201', transaction_status: 'capture', fraud_status: 'accept' })).toBeNull();
   });
 });
 
