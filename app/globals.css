@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Components use these semantic names, never raw palette colors.
+ * Primary is teal-700 so white text keeps WCAG AA contrast.
+ */
+@theme {
+  --color-primary: #0f766e;
+  --color-primary-hover: #115e59;
+  --color-primary-soft: #f0fdfa;
+  --color-primary-border: #99f6e4;
+  --color-primary-ink: #134e4a;
+
+  --color-success: #15803d;
+  --color-success-soft: #f0fdf4;
+  --color-success-ink: #166534;
+
+  --color-warning: #b45309;
+  --color-warning-soft: #fffbeb;
+  --color-warning-ink: #78350f;
+
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-danger-ink: #991b1b;
+
+  --color-ai: #6d28d9;
+  --color-ai-soft: #f5f3ff;
+  --color-ai-border: #ddd6fe;
+
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-subtle: #f1f5f9;
+  --color-foreground: #0f172a;
+  --color-muted: #475569;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
