@@ -63,8 +63,12 @@ test.describe('demo workspace as owner', () => {
     const card = page.getByRole('button', { name: /^Referral partnership/ });
     await expect(column(page, 'Lead').getByRole('button', { name: /^Referral partnership/ })).toBeVisible();
 
+    // The board moves the card at once and saves in the background (a server action). Reloading
+    // before that save finishes reads the old stage, so wait for its response first.
+    const saved = page.waitForResponse((r) => r.request().method() === 'POST' && !!r.request().headers()['next-action']);
     await drag(page, card, column(page, 'Qualified'));
     await expect(column(page, 'Qualified').getByRole('button', { name: /^Referral partnership/ })).toBeVisible();
+    await saved;
 
     await page.reload();
     await expect(column(page, 'Qualified').getByRole('button', { name: /^Referral partnership/ })).toBeVisible();

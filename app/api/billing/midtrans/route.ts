@@ -27,11 +27,14 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'invalid body' }, { status: 400 });
   }
-  if (typeof notification?.order_id !== 'string' || !verifySignature(notification, config.serverKey)) {
+  if (typeof notification?.order_id !== 'string') return NextResponse.json({ error: 'invalid body' }, { status: 400 });
+  // Midtrans' own test notifications and other apps' orders on the same account. Nothing is read or
+  // written for them, so they get a 200 before the signature check: the dashboard's test
+  // notification is not signed with the server key, and a 4xx makes Midtrans email a failure.
+  if (!notification.order_id.startsWith('relasi-')) return NextResponse.json({ ok: true, ignored: true });
+  if (!verifySignature(notification, config.serverKey)) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 401 });
   }
-  // Midtrans' own test notifications and other apps' orders on the same account.
-  if (!notification.order_id.startsWith('relasi-')) return NextResponse.json({ ok: true, ignored: true });
 
   let transaction: TransactionStatus;
   try {
