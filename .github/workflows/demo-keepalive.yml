@@ -1,0 +1,29 @@
+name: Demo keep-alive
+
+# The public demo runs on a free Supabase project, which pauses after a week without activity.
+# Signing in as the demo owner and reading one row every three days keeps it awake for visitors.
+# Set the repository variables DEMO_SUPABASE_URL and DEMO_SUPABASE_PUBLISHABLE_KEY after deploying;
+# until then the job is skipped.
+on:
+  schedule:
+    - cron: '41 4 */3 * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    if: vars.DEMO_SUPABASE_URL != ''
+    runs-on: ubuntu-latest
+    env:
+      API: ${{ vars.DEMO_SUPABASE_URL }}
+      # Public by design: the publishable key ships in the browser bundle, and the demo
+      # accounts are listed on the login page.
+      KEY: ${{ vars.DEMO_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Sign in as the demo owner and read the workspace
+        run: |
+          token=$(curl -fsS "$API/auth/v1/token?grant_type=password" \
+            -H "apikey: $KEY" -H "Content-Type: application/json" \
+            -d '{"email":"owner@demo.relasi.test","password":"relasi-demo"}' | jq -r .access_token)
+          curl -fsS "$API/rest/v1/organizations?select=name&limit=1" -H "apikey: $KEY" -H "Authorization: Bearer $token"
