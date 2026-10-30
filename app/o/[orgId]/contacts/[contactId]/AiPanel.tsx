@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { AiSourceNote } from '@/components/AiSourceNote';
+import { HeatMeter } from '@/components/HeatMeter';
 import { Alert, Badge, Button, Card, inputClass } from '@/components/ui';
 import { draftFollowUp, scoreContact, summarizeContact } from '@/features/ai/actions';
 import type { FollowUpDraft } from '@/lib/ai/schemas';
@@ -11,7 +12,8 @@ import { formatDateTime, whatsappLink } from '@/lib/format';
 /** What scoreContact stores in contacts.ai_score_reasons. */
 export type StoredScore = { reasons: string[]; next_step: string; temperature: 'hot' | 'warm' | 'cold'; source: AiSource };
 
-const temperatureTone = { hot: 'success', warm: 'warning', cold: 'neutral' } as const;
+const temperatureTone = { hot: 'warning', warm: 'neutral', cold: 'neutral' } as const;
+const temperatureLabel = { hot: 'Hot', warm: 'Warm', cold: 'Cold' } as const;
 
 export function AiPanel(props: {
   orgId: string;
@@ -77,9 +79,9 @@ export function AiPanel(props: {
       : null;
 
   return (
-    <Card className="border-ai-border">
-      <div className="flex items-center justify-between gap-3 border-b border-ai-border bg-ai-soft/60 px-4 py-3">
-        <h2 className="text-sm font-semibold text-ai">✦ AI assistant</h2>
+    <Card>
+      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold">AI assistant</h2>
         {props.updatedAt ? <span className="text-xs text-muted">Last run {formatDateTime(props.updatedAt)}</span> : null}
       </div>
 
@@ -113,10 +115,10 @@ export function AiPanel(props: {
           </div>
           {score != null && details ? (
             <div className="mt-2 space-y-2 text-sm">
-              <p className="flex items-center gap-2">
-                <span className="text-2xl font-semibold tabular-nums">{score}</span>
+              <p className="flex items-center gap-3">
+                <HeatMeter score={score} size="lg" />
                 <span className="text-muted">/ 100</span>
-                <Badge tone={temperatureTone[details.temperature]}>{details.temperature}</Badge>
+                <Badge tone={temperatureTone[details.temperature]}>{temperatureLabel[details.temperature]}</Badge>
               </p>
               <ul className="list-disc space-y-0.5 pl-5 text-muted">
                 {details.reasons.map((reason) => (
@@ -153,7 +155,7 @@ export function AiPanel(props: {
               placeholder="Goal (optional): e.g. confirm the meeting on Friday"
               className={inputClass}
             />
-            <Button type="button" variant="ai" size="md" onClick={() => runAction('draft')} disabled={pending}>
+            <Button type="button" variant="primary" size="md" onClick={() => runAction('draft')} disabled={pending}>
               {busy === 'draft' ? 'Drafting…' : 'Draft'}
             </Button>
           </div>
@@ -167,14 +169,19 @@ export function AiPanel(props: {
                   className={inputClass}
                 />
               ) : null}
+              {/* A WhatsApp draft sits in an outgoing-message bubble: it is what the contact will read. Still editable. */}
               <textarea
                 aria-label="Draft message"
                 value={draft.message}
                 onChange={(e) => setDraft({ ...draft, message: e.target.value })}
-                rows={channel === 'email' ? 8 : 5}
-                className={inputClass}
+                rows={channel === 'email' ? 8 : 4}
+                className={
+                  channel === 'whatsapp'
+                    ? 'ml-auto block w-full max-w-md resize-y rounded-2xl rounded-br-sm border border-primary-border bg-primary-soft px-3.5 py-2.5 text-sm leading-relaxed text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20'
+                    : inputClass
+                }
               />
-              <div className="flex flex-wrap gap-2">
+              <div className={channel === 'whatsapp' ? 'flex flex-wrap justify-end gap-2' : 'flex flex-wrap gap-2'}>
                 <Button
                   type="button"
                   variant="secondary"

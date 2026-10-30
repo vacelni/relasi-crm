@@ -65,7 +65,7 @@ export function Board({ orgId, stages, initialDeals }: { orgId: string; stages: 
   const openStages = stages.filter((s) => s.kind === 'open');
   const closedStages = stages.filter((s) => s.kind !== 'open');
 
-  // The board is wider than the page on most laptops: fade the right edge while there is more to scroll to.
+  // Lanes share the width on a laptop; on narrower screens the board scrolls, so fade the right edge while there is more.
   const scroller = useRef<HTMLDivElement>(null);
   const [moreRight, setMoreRight] = useState(false);
   useEffect(() => {
@@ -127,7 +127,7 @@ export function Board({ orgId, stages, initialDeals }: { orgId: string; stages: 
             ))}
             {/* Won and Lost share one lane: they are outcomes to drop onto, not stages to work in. */}
             {closedStages.length ? (
-              <div className="flex w-64 shrink-0 flex-col gap-3">
+              <div className="flex w-56 shrink-0 flex-col gap-3 lg:w-auto lg:min-w-48 lg:flex-1 lg:basis-0">
                 {closedStages.map((stage) => (
                   <Column key={stage.id} orgId={orgId} stage={stage} deals={columns.get(stage.id) ?? []} compact />
                 ))}
@@ -159,7 +159,7 @@ function Column({ orgId, stage, deals, compact = false }: { orgId: string; stage
       aria-label={`${stage.name}: ${deals.length} deals, ${formatRupiah(total)}`}
       className={cx(
         'flex shrink-0 flex-col rounded-card border border-t-[3px] bg-subtle/70 transition-colors',
-        compact ? 'w-full' : 'w-64 self-stretch',
+        compact ? 'w-full' : 'w-64 self-stretch lg:w-auto lg:min-w-48 lg:flex-1 lg:basis-0',
         accent[stage.kind],
         isOver ? 'border-x-primary border-b-primary bg-primary-soft' : 'border-x-border border-b-border',
       )}

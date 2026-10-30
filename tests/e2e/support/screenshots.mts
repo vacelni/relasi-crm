@@ -16,8 +16,8 @@ await page.goto(`${base}/login`);
 await page.getByRole('button', { name: 'Demo as owner' }).click();
 await page.waitForURL(`**${ORG}`);
 
-// Score a few leads first so the dashboard's "Hottest leads" list has entries.
-for (const name of ['Dewi Lestari', 'Yusuf Pratama', 'Hendra Gunawan']) {
+// Score the leads first, Maya included, so the dashboard's "Hottest leads" list matches the contact screenshot.
+for (const name of ['dr. Maya Putri', 'Dewi Lestari', 'Yusuf Pratama', 'Hendra Gunawan']) {
   await page.goto(`${base}${ORG}/contacts`);
   await page.getByRole('link', { name }).click();
   await page.getByRole('button', { name: 'Score lead' }).click();
@@ -33,8 +33,6 @@ await page.goto(`${base}${ORG}/contacts`);
 await page.getByRole('link', { name: 'dr. Maya Putri' }).click();
 await page.getByRole('button', { name: 'Summarize' }).click();
 await page.getByText(/^- dr\. Maya Putri/).waitFor();
-await page.getByRole('button', { name: 'Score lead' }).click();
-await page.getByText('/ 100').waitFor();
 await page.getByRole('button', { name: 'Draft', exact: true }).click();
 await page.getByRole('textbox', { name: 'Draft message' }).waitFor();
 await page.screenshot({ path: out('contact-ai'), fullPage: true });

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { HeatMeter } from '@/components/HeatMeter';
 import { Badge, Card, CardHeader, EmptyState, PageHeader } from '@/components/ui';
 import { activityVerb, formatDateTime, formatRelativeDays, formatRupiah, formatRupiahShort } from '@/lib/format';
 import { requireOrg } from '@/lib/org';
@@ -69,15 +70,18 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
     <>
       <PageHeader title={org.name} description={`${m?.contacts ?? 0} contacts${m?.overdue_tasks ? ` · ${m.overdue_tasks} overdue tasks` : ''}`} />
 
-      <section aria-label="Key numbers" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {tiles.map((tile) => (
-          <Card key={tile.label} className="p-4">
-            <p className="text-xs font-medium text-muted">{tile.label}</p>
-            <p className="mt-1 text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">{tile.value}</p>
-            <p className="mt-1 text-xs text-muted">{tile.note}</p>
-          </Card>
-        ))}
-      </section>
+      {/* One strip, not four cards: the numbers belong together and read left to right as a funnel. */}
+      <Card className="overflow-hidden">
+        <dl aria-label="Key numbers" className="grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
+          {tiles.map((tile) => (
+            <div key={tile.label} className="bg-surface px-4 py-4">
+              <dt className="text-xs font-medium text-muted">{tile.label}</dt>
+              <dd className="mt-1 text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">{tile.value}</dd>
+              <dd className="mt-1 text-xs text-muted">{tile.note}</dd>
+            </div>
+          ))}
+        </dl>
+      </Card>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
@@ -170,7 +174,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
                     <span className="block truncate font-medium">{c.full_name}</span>
                     <span className="block truncate text-xs text-muted">{c.companies?.name ?? 'No company'}</span>
                   </Link>
-                  <ScoreMeter score={c.ai_score!} />
+                  <HeatMeter score={c.ai_score!} />
                 </li>
               ))}
             </ul>
@@ -210,18 +214,5 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
         </Card>
       </div>
     </>
-  );
-}
-
-/** Lead score as a number plus a short bar, so the list can be scanned by length as well as by value. */
-function ScoreMeter({ score }: { score: number }) {
-  const tone = score >= 70 ? 'bg-success' : score >= 40 ? 'bg-warning' : 'bg-border-strong';
-  return (
-    <span className="flex shrink-0 items-center gap-2" aria-label={`Lead score ${score} out of 100`}>
-      <span aria-hidden="true" className="h-1.5 w-16 rounded-full bg-subtle">
-        <span className={`block h-1.5 rounded-full ${tone}`} style={{ width: `${score}%` }} />
-      </span>
-      <span className="w-7 text-right text-sm font-semibold tabular-nums">{score}</span>
-    </span>
   );
 }

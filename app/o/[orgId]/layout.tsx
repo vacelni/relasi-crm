@@ -18,24 +18,27 @@ export default async function WorkspaceLayout({ children, params }: { children: 
 
   return (
     <div className="min-h-dvh lg:flex">
-      <aside className="border-b border-border bg-surface lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-60 lg:shrink-0 lg:flex-col lg:border-r lg:border-b-0">
-        <div className="flex items-center justify-between gap-2 px-4 py-3 lg:block lg:space-y-3 lg:py-4">
-          <Link href={`/o/${orgId}`} aria-label="Dashboard">
-            <Logo />
-          </Link>
-          <OrgSwitcher current={orgId} workspaces={workspaces} />
-        </div>
-        <NavLinks orgId={orgId} />
-        <div className="hidden border-t border-border px-4 py-3 text-xs lg:mt-auto lg:block">
-          <p className="truncate font-medium text-foreground">{ctx.user.fullName ?? ctx.user.email}</p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-muted">
-            <span className="capitalize">{ctx.role}</span>
-            <span aria-hidden="true">·</span>
-            <Badge tone={effectivePlan(ctx.org) === 'pro' ? 'success' : 'neutral'}>{effectivePlan(ctx.org) === 'pro' ? 'Pro' : 'Free'}</Badge>
-          </p>
-          <form action={signOut} className="mt-2">
-            <button className="text-muted hover:text-foreground hover:underline">Sign out</button>
-          </form>
+      {/* The aside stretches to the page height (so its background and border never stop short); its content is sticky. */}
+      <aside className="border-b border-border bg-surface lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0">
+        <div className="lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 lg:block lg:space-y-3 lg:py-4">
+            <Link href={`/o/${orgId}`} aria-label="Dashboard">
+              <Logo />
+            </Link>
+            <OrgSwitcher current={orgId} workspaces={workspaces} />
+          </div>
+          <NavLinks orgId={orgId} />
+          <div className="hidden border-t border-border px-4 py-3 text-xs lg:mt-auto lg:block">
+            <p className="truncate font-medium text-foreground">{ctx.user.fullName ?? ctx.user.email}</p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-muted">
+              <span className="capitalize">{ctx.role}</span>
+              <span aria-hidden="true">·</span>
+              <Badge tone={effectivePlan(ctx.org) === 'pro' ? 'success' : 'neutral'}>{effectivePlan(ctx.org) === 'pro' ? 'Pro' : 'Free'}</Badge>
+            </p>
+            <form action={signOut} className="mt-2">
+              <button className="text-muted hover:text-foreground hover:underline">Sign out</button>
+            </form>
+          </div>
         </div>
       </aside>
 

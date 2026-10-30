@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Alert, Badge, Card, CardHeader, EmptyState, statusTone } from '@/components/ui';
+import { Alert, Badge, Card, CardHeader, EmptyState, statusLabel, statusTone } from '@/components/ui';
 import { deleteActivity, toggleTask } from '@/features/activities/actions';
 import { deleteContact } from '@/features/contacts/actions';
 import { isUuid } from '@/lib/errors';
@@ -79,7 +79,7 @@ export default async function ContactPage({
             {[contact.title, contact.companies?.name].filter(Boolean).join(' at ') || 'No title or company'}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-            <Badge tone={statusTone[contact.status as keyof typeof statusTone]}>{contact.status}</Badge>
+            <Badge tone={statusTone[contact.status as keyof typeof statusTone]}>{statusLabel[contact.status as keyof typeof statusLabel]}</Badge>
             <span className="text-muted">Owner: {contact.profiles?.full_name ?? 'Unassigned'}</span>
             {contact.email ? (
               <a href={`mailto:${contact.email}`} className="text-primary hover:underline">

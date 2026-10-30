@@ -1,31 +1,26 @@
 import Link from 'next/link';
+import { HeatMeter } from '@/components/HeatMeter';
 import { Logo } from '@/components/Logo';
 import { buttonClass } from '@/components/ui';
 import { signInDemo } from '@/features/auth/actions';
 
 const features = [
   {
-    title: 'Pipeline you can drag',
-    body: 'A Kanban board per workspace with stage probabilities, so the dashboard shows weighted pipeline and win rate, not just a list.',
+    title: 'A pipeline you can drag',
+    body: 'A board per workspace with stage probabilities, so the dashboard shows weighted pipeline and win rate, not just a list.',
   },
   {
-    title: 'AI that reads the history',
-    body: 'Claude summarizes every interaction with a contact, scores the lead with reasons you can check, and drafts the WhatsApp or email follow-up.',
+    title: 'Notes that turn into next steps',
+    body: 'Every call, meeting, and chat on a contact feeds a summary, a lead score with the evidence behind it, and a follow-up draft.',
   },
   {
-    title: 'Paste, don’t type',
-    body: 'Paste a business card, an email signature, or a WhatsApp chat and get structured contacts. Or import a spreadsheet export.',
+    title: 'Paste instead of typing',
+    body: 'Paste a business card, an email signature, or a WhatsApp chat to get structured contacts, or import a spreadsheet export.',
   },
   {
-    title: 'Built for a team',
-    body: 'Owner, admin, and sales roles enforced in Postgres row-level security, invitations, an audit log, and per-workspace AI quotas.',
+    title: 'Roles that hold',
+    body: 'Owner, admin, and sales roles are enforced by Postgres row-level security, with invitations, an audit log, and per-workspace AI quotas.',
   },
-];
-
-const steps = [
-  { title: 'Bring your contacts', body: 'Import the spreadsheet you already keep, or paste a WhatsApp chat.' },
-  { title: 'Log what happens', body: 'Calls, meetings, and chats go on the contact. Deals move across the board.' },
-  { title: 'Ask what to do next', body: 'Get a summary, a lead score with evidence, and a message ready to send.' },
 ];
 
 export default function Home() {
@@ -45,15 +40,15 @@ export default function Home() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4">
-        <section className="grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[1.1fr_1fr]">
+        <section className="grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[1fr_1fr]">
           <div>
-            <p className="text-sm font-medium text-primary">CRM for UMKM and small agencies</p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-              Know every customer relationship, and what to say next.
+            <h1 className="text-4xl leading-[1.05] font-bold tracking-tight text-balance sm:text-6xl">
+              Know every customer, and what to say next.
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-muted">
-              Relasi keeps your contacts, deals, and follow-ups in one place, then uses AI to summarize each relationship,
-              score leads, and draft the next message in Bahasa Indonesia or English.
+            <p className="mt-6 max-w-lg text-lg text-muted">
+              A CRM for UMKM and small agencies that sell over WhatsApp. Relasi keeps contacts, deals, and follow-ups in one
+              place, then summarizes each relationship, scores the lead, and drafts the next message in Bahasa Indonesia or
+              English.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {demoEnabled ? (
@@ -73,26 +68,11 @@ export default function Home() {
           <ProductPreview />
         </section>
 
-        <section aria-labelledby="how" className="border-y border-border py-12">
-          <h2 id="how" className="text-sm font-semibold text-muted">
-            How it works
-          </h2>
-          <ol className="mt-6 grid gap-8 sm:grid-cols-3">
-            {steps.map((step, i) => (
-              <li key={step.title}>
-                <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">{i + 1}</span>
-                <h3 className="mt-3 font-semibold">{step.title}</h3>
-                <p className="mt-1 text-sm text-muted">{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="grid gap-4 py-16 sm:grid-cols-2">
+        <section aria-label="Features" className="grid gap-x-10 gap-y-8 border-t border-border py-14 sm:grid-cols-2">
           {features.map((feature) => (
-            <div key={feature.title} className="rounded-card border border-border bg-surface p-5">
+            <div key={feature.title} className="max-w-md">
               <h2 className="font-semibold">{feature.title}</h2>
-              <p className="mt-2 text-sm text-muted">{feature.body}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{feature.body}</p>
             </div>
           ))}
         </section>
@@ -109,45 +89,58 @@ export default function Home() {
   );
 }
 
-/** A static picture of the contact page's AI panel, drawn in markup so it stays sharp and needs no screenshot. */
+const history = [
+  { when: '18 days ago', kind: 'Call', text: 'Misses ~30% of bookings that come in by phone after hours.' },
+  { when: '5 days ago', kind: 'Meeting', text: 'Partners liked the prototype. Budget Rp30-35jt approved.' },
+];
+
+const reasons = ['Status is qualified (+30)', 'Open deal at 50% stage probability (+15)', 'Budget is approved (+15)', 'Has a timeline (+8)'];
+
+/**
+ * A static picture of one contact from the live demo, drawn in markup so it stays sharp. The score, reasons, and
+ * draft are what the rule-based engine returns for this contact, so the picture matches what a visitor will see.
+ */
 function ProductPreview() {
   return (
-    <figure aria-label="Example: the AI assistant on a contact" className="relative">
-      <div aria-hidden="true" className="absolute -inset-4 -z-10 rounded-[1.5rem] bg-primary-soft" />
-      <div className="rounded-card border border-border bg-surface p-5 shadow-lg shadow-primary/5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-semibold">Dewi Lestari</p>
-            <p className="text-sm text-muted">Owner · Kopi Senja Nusantara</p>
-          </div>
-          <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-ink">Qualified</span>
+    <figure aria-label="Example: a contact in the demo workspace" className="rounded-card border border-border bg-surface shadow-[0_1px_2px_rgb(24_35_59/0.06),0_12px_32px_-12px_rgb(24_35_59/0.18)]">
+      <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+        <div>
+          <p className="font-semibold">dr. Maya Putri</p>
+          <p className="text-sm text-muted">Clinic director at Klinik Gigi Ceria</p>
         </div>
+        <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-ink">Qualified</span>
+      </div>
 
-        <div className="mt-4 rounded-control border border-ai-border bg-ai-soft p-3">
-          <div className="flex items-baseline justify-between">
-            <p className="text-xs font-semibold text-ai">Lead score</p>
-            <p className="text-2xl font-bold tabular-nums text-ai">
-              78<span className="text-sm font-medium">/100</span>
-            </p>
-          </div>
-          <div className="mt-2 h-1.5 rounded-full bg-surface">
-            <div className="h-1.5 w-[78%] rounded-full bg-ai" />
-          </div>
-          <ul className="mt-3 space-y-1 text-xs text-foreground">
-            <li>+ Asked for a revised proposal two days ago</li>
-            <li>+ Open deal of Rp45jt in Negotiation</li>
-            <li>− No reply to the last WhatsApp yet</li>
-          </ul>
-        </div>
+      <ol className="space-y-2 border-b border-border px-5 py-4 text-sm">
+        {history.map((item) => (
+          <li key={item.when} className="grid grid-cols-[5.5rem_1fr] gap-3">
+            <span className="text-xs leading-5 text-muted">{item.when}</span>
+            <span>
+              <span className="font-medium">{item.kind}.</span> {item.text}
+            </span>
+          </li>
+        ))}
+      </ol>
 
-        <div className="mt-3 rounded-control border border-border p-3">
-          <p className="text-xs font-semibold text-muted">Follow-up draft · WhatsApp</p>
-          <p className="mt-1.5 text-sm">
-            Halo Bu Dewi, ini proposal revisi untuk program loyalty Kopi Senja dengan opsi Rp45jt. Apakah Kamis siang bisa
-            kita bahas 15 menit?
-          </p>
-          <p className="mt-2 text-xs font-medium text-primary">Open in WhatsApp →</p>
+      <div className="border-b border-border px-5 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold">Lead score</p>
+          <HeatMeter score={80} size="lg" />
         </div>
+        <ul className="mt-2 grid gap-x-4 gap-y-0.5 text-xs text-muted sm:grid-cols-2">
+          {reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="px-5 py-4">
+        <p className="text-sm font-semibold">Follow-up draft</p>
+        <p className="mt-2 ml-auto max-w-sm rounded-2xl rounded-br-sm border border-primary-border bg-primary-soft px-3.5 py-2.5 text-sm leading-relaxed">
+          Halo Maya, semoga sehat selalu. Saya ingin menindaklanjuti soal &ldquo;Demo of booking prototype&rdquo;. Apakah ada
+          waktu minggu ini untuk ngobrol sebentar? Terima kasih.
+        </p>
+        <figcaption className="mt-3 text-xs text-muted">From the demo workspace, scored and drafted in rule-based mode.</figcaption>
       </div>
     </figure>
   );

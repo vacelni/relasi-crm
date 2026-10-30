@@ -56,7 +56,7 @@ export function ExtractContacts({ orgId }: { orgId: string }) {
 
   return (
     <details className="rounded-card border border-ai-border bg-surface self-start">
-      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-ai">✦ Paste text to extract contacts</summary>
+      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-primary">Paste text to extract contacts</summary>
       <div className="space-y-3 border-t border-ai-border p-4">
         <p className="text-xs text-muted">Business cards, email signatures, WhatsApp chats, sign-up lists. Nothing is saved until you confirm.</p>
         <textarea

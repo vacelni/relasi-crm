@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Badge, ButtonLink, Card, EmptyState, inputClass, PageHeader, statusTone } from '@/components/ui';
+import { Badge, ButtonLink, Card, EmptyState, inputClass, PageHeader, statusLabel, statusTone } from '@/components/ui';
 import { formatDate } from '@/lib/format';
 import { requireOrg } from '@/lib/org';
 import { ExtractContacts } from './ExtractContacts';
@@ -105,7 +105,7 @@ export default async function ContactsPage({
                     </td>
                     <td className="px-4 py-2.5 text-muted">{c.companies?.name ?? '—'}</td>
                     <td className="px-4 py-2.5">
-                      <Badge tone={statusTone[c.status as keyof typeof statusTone]}>{c.status}</Badge>
+                      <Badge tone={statusTone[c.status as keyof typeof statusTone]}>{statusLabel[c.status as keyof typeof statusLabel]}</Badge>
                     </td>
                     <td className="px-4 py-2.5 tabular-nums">{c.ai_score ?? <span className="text-muted">—</span>}</td>
                     <td className="hidden px-4 py-2.5 text-muted md:table-cell">{c.profiles?.full_name ?? 'Unassigned'}</td>

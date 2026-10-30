@@ -147,9 +147,14 @@ begin
   select v_org, a.kind, a.subject, a.body, ct.id,
     (select dl.id from public.deals dl where dl.org_id = v_org and dl.contact_id = ct.id order by dl.position limit 1),
     case when a.due_days is not null then now() + make_interval(days => a.due_days) end,
-    case when a.done then now() - make_interval(days => a.ago) end,
-    a.owner_id, now() - make_interval(days => a.ago)
-  from (values
+    case when a.done then a.happened_at end,
+    a.owner_id, a.happened_at
+  from (
+    -- Each interaction lands in Jakarta working hours (08:30-17:30), at a time fixed by its subject,
+    -- so the history does not show every entry at the minute the demo was last reset.
+    select v.*, ((now() at time zone 'Asia/Jakarta')::date - v.ago + time '08:30'
+      + make_interval(mins => abs(hashtext(v.subject)) % 540)) at time zone 'Asia/Jakarta' as happened_at
+    from (values
     ('Dewi Lestari', 'meeting', 'Discovery meeting at the Pandanaran outlet',
       'Walked through current sales: ~600 cups/day across 3 outlets. Repeat customers are ~40%. She wants a points-based loyalty program and ads for the new outlet. Decision with her husband (co-owner).',
       null::int, true, 21, v_owner),
@@ -169,7 +174,8 @@ begin
     ('Sari Larasati', 'call', 'Monthly retainer review', 'Marketplace sales up 18% month on month. Happy with the work; asked about a Lebaran campaign again next year.', null, true, 3, v_owner),
     ('Tini Rahayu', 'whatsapp', 'Project paused', 'Slow quarter, cash flow tight. Asked us to check back in January.', null, true, 25, v_sales),
     ('Rudi Hartono', 'note', 'Coffee chat', 'Works with ~10 F&B owners. Proposed a 10% referral fee.', null, true, 7, v_sales)
-  ) as a (contact_name, kind, subject, body, due_days, done, ago, owner_id)
+    ) as v (contact_name, kind, subject, body, due_days, done, ago, owner_id)
+  ) as a
   join public.contacts ct on ct.org_id = v_org and ct.full_name = a.contact_name;
 
   -- The rebuild itself is not something a visitor did.

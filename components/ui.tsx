@@ -84,6 +84,7 @@ export function Badge({ tone = 'neutral', children }: { tone?: keyof typeof badg
 }
 
 export const statusTone = { lead: 'neutral', qualified: 'primary', customer: 'success', churned: 'danger' } as const;
+export const statusLabel = { lead: 'Lead', qualified: 'Qualified', customer: 'Customer', churned: 'Churned' } as const;
 
 export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
   return (
