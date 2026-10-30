@@ -9,6 +9,8 @@ business cards or chats into contacts.
 
 **Live demo:** _coming soon_ · sign in with one click as the owner or as a sales rep (data resets every hour).
 
+**Design docs:** [product requirements](docs/PRD.md) · [architecture decisions](docs/adr/README.md)
+
 ![Dashboard](docs/screenshots/dashboard.png)
 
 | Pipeline board | Contact with the AI assistant |

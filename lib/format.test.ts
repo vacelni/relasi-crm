@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatRelativeDays, formatRupiah, formatRupiahShort, parseRupiah, whatsappLink } from './format';
+import { activityVerb, formatRelativeDays, formatRupiah, formatRupiahShort, parseRupiah, whatsappLink } from './format';
 
 describe('rupiah', () => {
   it('formats whole rupiah with Indonesian grouping', () => {
@@ -44,5 +44,17 @@ describe('whatsappLink', () => {
     expect(whatsappLink('0812-0000-1001')).toBe('https://wa.me/6281200001001');
     expect(whatsappLink('+62 812 0000 1001', 'Halo!')).toBe('https://wa.me/6281200001001?text=Halo!');
     expect(whatsappLink('123')).toBeNull();
+  });
+});
+
+describe('activityVerb', () => {
+  it('reads as a sentence for every kind', () => {
+    expect(activityVerb('call')).toEqual({ verb: 'called', withContact: '' });
+    expect(activityVerb('whatsapp')).toEqual({ verb: 'chatted on WhatsApp', withContact: 'with' });
+    expect(activityVerb('note')).toEqual({ verb: 'added a note', withContact: 'on' });
+  });
+
+  it('falls back to a note for an unknown kind', () => {
+    expect(activityVerb('fax').verb).toBe('added a note');
   });
 });

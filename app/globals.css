@@ -27,7 +27,7 @@
   --color-ai-soft: #f5f3ff;
   --color-ai-border: #ddd6fe;
 
-  --color-background: #f8fafc;
+  --color-background: #f7f8f6;
   --color-surface: #ffffff;
   --color-subtle: #f1f5f9;
   --color-foreground: #0f172a;
@@ -38,7 +38,7 @@
   --radius-control: 0.5rem;
   --radius-card: 0.75rem;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 html {

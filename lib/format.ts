@@ -78,3 +78,30 @@ export function whatsappLink(phone: string, text?: string): string | null {
   if (digits.length < 8) return null;
   return `https://wa.me/${digits}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
 }
+
+export const ACTIVITY_KIND_LABEL: Record<string, string> = {
+  note: 'Note',
+  call: 'Call',
+  meeting: 'Meeting',
+  email: 'Email',
+  whatsapp: 'WhatsApp',
+  task: 'Task',
+};
+
+/** The verb for an activity feed line: "Rina called Dewi", "Budi chatted on WhatsApp with Yusuf". */
+export function activityVerb(kind: string): { verb: string; withContact: string } {
+  switch (kind) {
+    case 'call':
+      return { verb: 'called', withContact: '' };
+    case 'meeting':
+      return { verb: 'met', withContact: '' };
+    case 'email':
+      return { verb: 'emailed', withContact: '' };
+    case 'whatsapp':
+      return { verb: 'chatted on WhatsApp', withContact: 'with' };
+    case 'task':
+      return { verb: 'completed a task', withContact: 'for' };
+    default:
+      return { verb: 'added a note', withContact: 'on' };
+  }
+}

@@ -5,7 +5,7 @@ import { Alert, Badge, Card, CardHeader, EmptyState, statusTone } from '@/compon
 import { deleteActivity, toggleTask } from '@/features/activities/actions';
 import { deleteContact } from '@/features/contacts/actions';
 import { isUuid } from '@/lib/errors';
-import { formatDate, formatDateTime, formatRelativeDays, formatRupiah, whatsappLink } from '@/lib/format';
+import { ACTIVITY_KIND_LABEL, formatDate, formatDateTime, formatRelativeDays, formatRupiah, whatsappLink } from '@/lib/format';
 import { canEdit, isAdmin, requireOrg } from '@/lib/org';
 import { NewDealForm } from '../../pipeline/NewDealForm';
 import { ActivityForm } from './ActivityForm';
@@ -13,15 +13,6 @@ import { AiPanel, type StoredScore } from './AiPanel';
 import { ContactEditForm } from './ContactEditForm';
 
 export const metadata: Metadata = { title: 'Contact' };
-
-const KIND_LABEL: Record<string, string> = {
-  note: 'Note',
-  call: 'Call',
-  meeting: 'Meeting',
-  email: 'Email',
-  whatsapp: 'WhatsApp',
-  task: 'Task',
-};
 
 export default async function ContactPage({
   params,
@@ -142,7 +133,7 @@ export default async function ContactPage({
                   <li key={a.id} className="px-4 py-3 text-sm">
                     <div className="flex items-start justify-between gap-3">
                       <p>
-                        <Badge>{KIND_LABEL[a.kind] ?? a.kind}</Badge> <span className="font-medium">{a.subject}</span>
+                        <Badge>{ACTIVITY_KIND_LABEL[a.kind] ?? a.kind}</Badge> <span className="font-medium">{a.subject}</span>
                       </p>
                       {canEdit(ctx, a.owner_id) ? (
                         <form action={deleteActivity.bind(null, orgId)}>

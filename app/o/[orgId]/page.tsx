@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge, Card, CardHeader, EmptyState, PageHeader } from '@/components/ui';
-import { formatDateTime, formatRelativeDays, formatRupiah, formatRupiahShort } from '@/lib/format';
+import { activityVerb, formatDateTime, formatRelativeDays, formatRupiah, formatRupiahShort } from '@/lib/format';
 import { requireOrg } from '@/lib/org';
 
 export const metadata: Metadata = { title: 'Dashboard' };
@@ -50,7 +50,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
       .limit(6),
   ]);
   const m = metricsResult.data as Metrics | null;
-  const maxStage = Math.max(1, ...(m?.stages ?? []).map((s) => s.value));
+  const openStages = (m?.stages ?? []).filter((s) => s.kind === 'open');
+  const closedStages = (m?.stages ?? []).filter((s) => s.kind !== 'open');
+  const maxOpen = Math.max(1, ...openStages.map((s) => s.value));
 
   const tiles = [
     { label: 'Open pipeline', value: formatRupiah(m?.open_value ?? 0), note: 'All deals in open stages' },
@@ -87,29 +89,42 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
               </Link>
             }
           />
-          {/* A bar list: every value is also written out, so it doubles as the table view. */}
-          <ul className="space-y-3 px-4 py-4">
-            {(m?.stages ?? []).map((stage) => (
+          {/* A bar list: every value is also written out, so it doubles as the table view. Open stages share one
+              scale; closed deals are a separate outcome row, so a large Lost total does not flatten the funnel. */}
+          <ul className="space-y-3 px-4 pt-4">
+            {openStages.map((stage) => (
               <li key={stage.id} title={`${stage.name}: ${formatRupiah(stage.value)} across ${stage.count} deals`}>
                 <div className="flex items-baseline justify-between gap-3 text-sm">
                   <span className="font-medium">
                     {stage.name}{' '}
                     <span className="font-normal text-muted">
-                      {stage.kind === 'open' ? `${stage.probability}% · ` : ''}
-                      {stage.count} {stage.count === 1 ? 'deal' : 'deals'}
+                      {stage.probability}% · {stage.count} {stage.count === 1 ? 'deal' : 'deals'}
                     </span>
                   </span>
                   <span className="tabular-nums">{formatRupiahShort(stage.value)}</span>
                 </div>
                 <div className="mt-1.5 h-2 rounded-full bg-subtle">
                   <div
-                    className={stage.kind === 'lost' ? 'h-2 rounded-full bg-primary/35' : 'h-2 rounded-full bg-primary'}
-                    style={{ width: `${(stage.value / maxStage) * 100}%`, minWidth: stage.value > 0 ? '4px' : 0 }}
+                    className="h-2 rounded-full bg-primary"
+                    style={{ width: `${(stage.value / maxOpen) * 100}%`, minWidth: stage.value > 0 ? '4px' : 0 }}
                   />
                 </div>
               </li>
             ))}
           </ul>
+          <dl className="mx-4 mt-4 mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-control border border-border bg-border text-sm">
+            {closedStages.map((stage) => (
+              <div key={stage.id} className="bg-surface px-3 py-2">
+                <dt className="flex items-center gap-1.5 text-xs text-muted">
+                  <span aria-hidden="true" className={stage.kind === 'won' ? 'size-2 rounded-full bg-success' : 'size-2 rounded-full bg-danger/60'} />
+                  {stage.name} · {stage.count} {stage.count === 1 ? 'deal' : 'deals'}
+                </dt>
+                <dd className={stage.kind === 'won' ? 'mt-0.5 font-semibold tabular-nums text-success-ink' : 'mt-0.5 font-semibold tabular-nums text-muted'}>
+                  {formatRupiahShort(stage.value)}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </Card>
 
         <Card className="lg:col-span-2">
@@ -155,7 +170,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
                     <span className="block truncate font-medium">{c.full_name}</span>
                     <span className="block truncate text-xs text-muted">{c.companies?.name ?? 'No company'}</span>
                   </Link>
-                  <Badge tone={c.ai_score! >= 70 ? 'success' : c.ai_score! >= 40 ? 'warning' : 'neutral'}>{c.ai_score}</Badge>
+                  <ScoreMeter score={c.ai_score!} />
                 </li>
               ))}
             </ul>
@@ -172,11 +187,11 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
                 <li key={a.id} className="px-4 py-3 text-sm">
                   <p>
                     <span className="font-medium">{a.profiles?.full_name ?? 'Someone'}</span>{' '}
-                    <span className="text-muted">logged a {a.kind}</span>
+                    <span className="text-muted">{activityVerb(a.kind).verb}</span>
                     {a.contacts ? (
                       <>
                         {' '}
-                        <span className="text-muted">with</span>{' '}
+                        {activityVerb(a.kind).withContact ? <span className="text-muted">{activityVerb(a.kind).withContact} </span> : null}
                         <Link href={`${base}/contacts/${a.contacts.id}`} className="font-medium hover:underline">
                           {a.contacts.full_name}
                         </Link>
@@ -195,5 +210,18 @@ export default async function DashboardPage({ params }: { params: Promise<{ orgI
         </Card>
       </div>
     </>
+  );
+}
+
+/** Lead score as a number plus a short bar, so the list can be scanned by length as well as by value. */
+function ScoreMeter({ score }: { score: number }) {
+  const tone = score >= 70 ? 'bg-success' : score >= 40 ? 'bg-warning' : 'bg-border-strong';
+  return (
+    <span className="flex shrink-0 items-center gap-2" aria-label={`Lead score ${score} out of 100`}>
+      <span aria-hidden="true" className="h-1.5 w-16 rounded-full bg-subtle">
+        <span className={`block h-1.5 rounded-full ${tone}`} style={{ width: `${score}%` }} />
+      </span>
+      <span className="w-7 text-right text-sm font-semibold tabular-nums">{score}</span>
+    </span>
   );
 }
