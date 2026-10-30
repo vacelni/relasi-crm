@@ -47,3 +47,6 @@ supabase/.temp/
 
 # Next.js auto-generated agent notes (rewritten by `next dev`)
 AGENTS.md
+
+# Vercel CLI link
+.vercel
