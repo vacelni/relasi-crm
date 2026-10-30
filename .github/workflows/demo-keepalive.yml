@@ -27,3 +27,14 @@ jobs:
             -H "apikey: $KEY" -H "Content-Type: application/json" \
             -d '{"email":"owner@demo.relasi.test","password":"relasi-demo"}' | jq -r .access_token)
           curl -fsS "$API/rest/v1/organizations?select=name&limit=1" -H "apikey: $KEY" -H "Authorization: Bearer $token"
+
+  stay-enabled:
+    # GitHub turns off scheduled workflows in a public repository after 60 days without a commit.
+    # Re-enabling this workflow on every run resets that clock.
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - run: gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/demo-keepalive.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}

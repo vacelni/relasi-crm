@@ -7,7 +7,7 @@ companies, deals, and follow-ups in one workspace, works the pipeline on a drag-
 summarize each relationship, score leads with reasons, draft the next WhatsApp or email message, and turn pasted
 business cards or chats into contacts.
 
-**Live demo:** _coming soon_ · sign in with one click as the owner or as a sales rep (data resets every hour).
+**Live demo:** [relasicrm.vercel.app](https://relasicrm.vercel.app) · sign in with one click as the owner or as a sales rep (data resets every hour).
 
 **Design docs:** [product requirements](docs/PRD.md) · [architecture decisions](docs/adr/README.md)
 
